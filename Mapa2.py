@@ -21,7 +21,7 @@ mapa = ["1011110000",
 
 
 # Funciones
-def construirMapa(mapa):
+def construir_mapa(mapa):
     muros = []
     camino = []
     x, y = 0, 0
@@ -37,7 +37,7 @@ def construirMapa(mapa):
         y = y + 60
     return muros, camino
 
-def dibujarMapa(vent):
+def dibujar_mapa(vent):
     x, y = 0, 0
     imgMuro = pygame.image.load("src/agua.jpg").convert()
     imgSuelo = pygame.image.load("src/suelo.png").convert()
@@ -47,29 +47,45 @@ def dibujarMapa(vent):
             if baldosa == "1":
                 vent.blit(imgMuro, (x, y))
             else:
-                pygame.draw.rect(vent, (113, 250, 95), (x, y, 60, 60))
+                pygame.draw.rect(vent, (0, 0, 0), (x, y, 60, 60))
+                # pygame.draw.rect(vent, (113, 250, 95), (x, y, 60, 60))
                 # vent.blit(imgSuelo, (x, y))
             x = x + 60
         x = 0
         y = y + 60
 
-def dibujarPersonaje(ventana, objeto):
-    # pygame.draw.rect(ventana, (0, 255, 0), objeto)
+def dibujar_personaje(ventana, objeto):
     psj = pygame.image.load("src/fiaun_chiquito.jpg").convert()
-    # psj.set_colorkey((255, 255, 255))
     ventana.blit(psj, (objeto.x, objeto.y))
+
+def dibujar_objetivo(ventana, objeto):
+    objetivo = pygame.image.load("src/meta.jpg")
+    objetivo.set_colorkey((30, 255, 0))
+    ventana.blit(objetivo, (objeto.x, objeto.y))
 
 
 # Ventana
 ventana = pygame.display.set_mode((Ancho, Largo))
 
 # Variables
-muros, camino = construirMapa(mapa)
-random = random.randint(0, (len(camino)-1))
+muros, camino = construir_mapa(mapa)
+randPsj = random.randint(0, (len(camino)-1))
+randObj = random.randint(0, (len(camino)-1))
 reloj = pygame.time.Clock()
-personaje = pygame.Rect(camino[random][0], camino[random][1], 60, 60)
+personaje = pygame.Rect(camino[randPsj][0], camino[randPsj][1], 60, 60)
 personajeVelocidadX, personajeVelocidadY = 0, 0
 direccion = None
+objetivos = []
+
+while True:
+    if randPsj == randObj:
+        randObj = random.randint(0, (len(camino) - 1))
+    else:
+        metaObj = pygame.Rect(camino[randObj][0], camino[randObj][1], 60, 60)
+        metaObj.x, metaObj.y = camino[randObj][0], camino[randObj][1]
+        objetivos.append(metaObj)
+        break
+
 
 # Bucle principal donde se ejecutara el juego
 jugando = True
@@ -133,9 +149,16 @@ while jugando:
                 personaje.bottom = muro.top
             if direccion == "arriba":
                 personaje.top = muro.bottom
+
+    for premio in objetivos:
+        if personaje.collidepoint(premio.centerx, premio.centery):
+            objetivos.remove(premio)
+
     # Mapa
     ventana.fill((255, 255, 255))
-    dibujarMapa(ventana)
-    dibujarPersonaje(ventana, personaje)
+    dibujar_mapa(ventana)
+    dibujar_personaje(ventana, personaje)
+    if len(objetivos) != 0:
+        dibujar_objetivo(ventana, metaObj)
     pygame.display.flip()
     pygame.display.update()
