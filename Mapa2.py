@@ -8,16 +8,16 @@ pygame.init()
 Ancho, Largo = 1280, 600
 
 # Mapa
-mapa = ["1011110000",
-        "1001000010",
-        "1011101110",
-        "1000100010",
-        "1010101100",
-        "1110001001",
-        "0000101011",
-        "1110111000",
-        "1000000010",
-        "1011010111"]
+mapa = ["0000010000",
+        "0100010101",
+        "0100100000",
+        "0001000110",
+        "0000000010",
+        "1100101010",
+        "0100000010",
+        "0000100000",
+        "0001110001",
+        "1100000100"]
 
 
 # Funciones
@@ -59,9 +59,25 @@ def dibujar_personaje(ventana, objeto):
     ventana.blit(psj, (objeto.x, objeto.y))
 
 def dibujar_objetivo(ventana, objeto):
-    objetivo = pygame.image.load("src/meta.jpg")
-    objetivo.set_colorkey((30, 255, 0))
+    objetivo = pygame.image.load("src/meta.png").convert()
+    objetivo.set_colorkey((0, 255, 0))
     ventana.blit(objetivo, (objeto.x, objeto.y))
+
+def reiniciar_juego():
+    randPsj = random.randint(0, (len(camino) - 1))
+    randObj = random.randint(0, (len(camino) - 1))
+    personaje = pygame.Rect(camino[randPsj][0], camino[randPsj][1], 60, 60)
+    while len(objetivos) != 0:
+        objetivos.pop()
+    while True:
+        if randPsj == randObj:
+            randObj = random.randint(0, (len(camino) - 1))
+        else:
+            metaObj = pygame.Rect(camino[randObj][0], camino[randObj][1], 60, 60)
+            metaObj.x, metaObj.y = camino[randObj][0], camino[randObj][1]
+            objetivos.append(metaObj)
+            break
+    return personaje, metaObj
 
 
 # Ventana
@@ -102,6 +118,8 @@ while jugando:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 jugando = False
+            if event.key == pygame.K_r:
+                personaje, metaObj = reiniciar_juego()
             if event.key == pygame.K_RIGHT:
                 direccion = "derecha"
                 personajeVelocidadX = 60
